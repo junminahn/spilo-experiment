@@ -26,7 +26,7 @@ jobs:
         env:
           BASE_IMAGE: registry.opensource.zalan.do/acid/spilo-14:2.1-p5
         with:
-          context: zalando/postgres-appliance
+          context: .
           push: true
           tags: ${{ github.event.inputs.ref}}
           labels: spilo-experiment
