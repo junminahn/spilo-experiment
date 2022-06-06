@@ -1,0 +1,48 @@
+name: Create and publish Spilo Image with custom configuration scripts
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "branch, tag or SHA"
+        required: true
+
+env:
+  GITHUB_REGISTRY: ghcr.io
+  IMAGE_NAME: junminahn/spilo
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Checkout the base release repo
+        uses: actions/checkout@v3
+        with:
+          repository: zalando/spilo
+          # The branch, tag or SHA to checkout.
+          ref: ${{ github.event.inputs.ref}}
+          path: 'zalando'
+
+      - name: Override configuration scripts
+        run: cp ./postgres-appliance/scripts/* ./zalando/postgres-appliance/scripts
+
+      - name: Log in to the GitHub Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.GITHUB_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: zalando/postgres-appliance
+          push: true
+          tags: ${{ github.event.inputs.ref}}
+          labels: spilo-experiment
