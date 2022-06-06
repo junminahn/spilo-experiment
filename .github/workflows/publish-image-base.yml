@@ -1,0 +1,33 @@
+name: Create and publish Spilo Image with custom configuration scripts
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "branch, tag or SHA"
+        required: true
+
+env:
+  GITHUB_REGISTRY: ghcr.io
+  IMAGE_NAME: junminahn/spilo
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        env:
+          BASE_IMAGE: registry.opensource.zalan.do/acid/spilo-14:2.1-p5
+        with:
+          context: zalando/postgres-appliance
+          push: true
+          tags: ${{ github.event.inputs.ref}}
+          labels: spilo-experiment
+          build-args: BASE_IMAGE=${{ env.BASE_IMAGE }}
