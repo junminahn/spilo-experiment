@@ -35,6 +35,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ github.event.inputs.ref}}
+          tags: ${{ env.GITHUB_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.ref}}
           labels: spilo-experiment
           build-args: BASE_IMAGE=${{ env.BASE_IMAGE }}
